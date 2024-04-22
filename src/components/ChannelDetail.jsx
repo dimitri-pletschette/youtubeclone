@@ -6,20 +6,27 @@ import { Videos, ChannelCard } from "./";
 import { fetchFromAPI } from "../utils/fetchFromAPI";
 
 const ChannelDetail = () => {
+  // State variables to store channel details and videos
   const [channelDetail, setChannelDetail] = useState();
   const [videos, setVideos] = useState(null);
 
+  // Get the channel id from the route parameters
   const { id } = useParams();
 
+  // Fetch channel details and videos when the id changes
   useEffect(() => {
     const fetchResults = async () => {
-      const data = await fetchFromAPI(`channels?part=snippet&id=${id}`);
+      try {
+        // Fetch channel details
+        const channelData = await fetchFromAPI(`channels?part=snippet&id=${id}`);
+        setChannelDetail(channelData?.items[0]);
 
-      setChannelDetail(data?.items[0]);
-
-      const videosData = await fetchFromAPI(`search?channelId=${id}&part=snippet%2Cid&order=date`);
-
-      setVideos(videosData?.items);
+        // Fetch videos for the channel
+        const videosData = await fetchFromAPI(`search?channelId=${id}&part=snippet%2Cid&order=date`);
+        setVideos(videosData?.items);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
     fetchResults();
@@ -27,6 +34,7 @@ const ChannelDetail = () => {
 
   return (
     <Box minHeight="95vh">
+      {/* Channel header */}
       <Box>
         <div style={{
           height:'300px',
@@ -35,8 +43,12 @@ const ChannelDetail = () => {
         }} />
         <ChannelCard channelDetail={channelDetail} marginTop="-93px" />
       </Box>
+      
+      {/* Video list */}
       <Box p={2} display="flex">
-      <Box sx={{ mr: { sm: '100px' } }}/>
+        {/* Spacer */}
+        <Box sx={{ mr: { sm: '100px' } }}/>
+        {/* Display videos */}
         <Videos videos={videos} />
       </Box>
     </Box>
